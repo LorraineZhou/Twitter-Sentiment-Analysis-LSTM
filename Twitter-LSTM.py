@@ -54,7 +54,7 @@ for idx in range(data_train.SentimentText.shape[0]):
 
 
 embeddings_index = {}
-f = open(os.path.abspath('glove.twitter.27B.100d.txt'),encoding='UTF-8')
+f = open(os.path.abspath('glove.6B.100d.txt'),encoding='UTF-8')
 for line in f:
     values = line.split()
     word = values[0]
@@ -113,7 +113,8 @@ embedding_layer = Embedding(len(word_index) + 1,
                             weights=[embedding_matrix],
                             mask_zero=False,
                             input_length=MAX_SEQUENCE_LENGTH,
-                            trainable=False)
+                            trainable=True)
+#词向量可训练
 
 print('Traing and validation set number of positive and negative reviews')
 print (y_train.sum(axis=0))
@@ -124,8 +125,10 @@ print (y_val.sum(axis=0))
 sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences = embedding_layer(sequence_input)
 l_gru = Bidirectional(LSTM(100, return_sequences=False))(embedded_sequences)
-dense_1 = Dense(100,activation='tanh')(l_gru)
-dense_2 = Dense(2, activation='softmax')(dense_1)
+dropout_1=Dropout(0.5)(l_gru)
+dense_1 = Dense(100,activation='tanh')(dropout_1)
+dropout_2=Dropout(0.5)(dense_1)
+dense_2 = Dense(2, activation='softmax')(dropout_2)
 
 model = Model(sequence_input, dense_2)
 
